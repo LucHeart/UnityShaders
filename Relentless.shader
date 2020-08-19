@@ -1,35 +1,40 @@
 Shader "zLucPlayZ/Relentless" {
 
 	Properties {
-	    [Header(___ Main settings ___)]
+	    [Header(___ Main Settings ___)]
 	    [Space(10)]
         _CColor("Main Color", Color) = (0.95, 0.58, 0.0, 0.45)
-        [Header(___ Camera settings ___)]
+        _DColor("Detail Color", Color) = (1, 1, 1, 1)
+        _BaseBrightness("Detail Base Brightness", Range(0, 10)) = 0.4
+        _BreathIntensity("Breath Intensity", Range(0, 5)) = 0.6
+        _BreathSpeed("Breath Speed", Range(0, 5)) = 1
+        [Header(___ Camera Settings ___)]
 	    [Space(10)]
-        _CamOffset("Camera offset", Vector) = (0,0,0,0)
-        _CamOffsetMultiplier("Camera offset multiplier (speed, warning)", Vector) = (1,1,1,0)
-        _CamShakeIntensity("Camera shake intensity", Range(0, 50)) = 1
-        _CamMoveSpeed("Camera movement speed ", Range(0, 10)) = 2
-        [Header(___ Floor settings ___)]
+        _CamOffset("Camera Offset", Vector) = (0,0,0,0)
+        _CamOffsetMultiplier("Camera Offset Multiplier (might feel weird)", Vector) = (1,1,1,0)
+        _CamShakeIntensity("Camera Shake Intensity", Range(0, 50)) = 1
+        _CamIqShakeIntensity("Camera IQ Shake Intensity", Range(0, 10)) = 1
+        _CamMoveSpeed("Camera X Movement Speed ", Range(0, 10)) = 2
+        [Header(___ Floor Settings ___)]
 	    [Space(10)]
-	    _FloorIteration("Floor iteration", Range(0, 50)) = 4
-	    _FloorFxLayer("Floor fx layer", Range(0, 50)) = 4
+	    _FloorIteration("Floor Iteration", Range(0, 50)) = 4
+	    _FloorFxLayer("Floor FX Layer", Range(0, 50)) = 4
 	    _FloorGaps("Floor Gaps", Range(0, 10)) = 1
-	    _FloorOffset("Floor offset", Vector) = (0,0,0,0)
-        [Header(___ Circle and Stream settings ___)]
+	    _FloorOffset("Floor Offset", Vector) = (0,0,0,0)
+        [Header(___ Circle and Stream Settings ___)]
 	    [Space(10)]
-        _CirclesIteration("Circle iteration", Range(0, 100)) = 4
-        _CirclesStart("Circle offset", Range(-100, 100)) = -16.0
-        _CircleGaps("Circle gaps", Range(0, 50)) = 8.0
-        _StreamIteration("Stream iterations", Range(0, 100)) = 20
-        [Header(___ Camera settings ___)]
+        _CirclesIteration("Circle Iteration", Range(0, 100)) = 4
+        _CirclesStart("Circle Offset", Range(-100, 100)) = -16.0
+        _CircleGaps("Circle Gaps", Range(0, 50)) = 8.0
+        _StreamIteration("Stream Iterations", Range(0, 100)) = 20
+        [Header(___ Background Settings ___)]
 	    [Space(10)]
-	    _BgDarken("Background darken", Range(0, 20)) = 1
-	    _BgMaxBrightness("Background max birghtness", Range(0, 5)) = 0.2
-	    _BgBreathSpread("Background breath spread", Range(0, 2)) = 1
-        [Header(___ Util settings ___)]
+	    _BgDarken("Background Darken", Range(0, 20)) = 1
+	    _BgMaxBrightness("Background Max Birghtness", Range(0, 5)) = 0.2
+	    _BgBreathSpread("Background Breath Spread", Range(0, 2)) = 1
+        [Header(___ Util Settings ___)]
 	    [Space(10)]
-	    _TimeMultiplier("Time multiplier", Range(0,10)) = 1
+	    _TimeMultiplier("Time Multiplier", Range(0,10)) = 1
 	}
 
 	SubShader {
@@ -42,10 +47,15 @@ Shader "zLucPlayZ/Relentless" {
             #include "UnityCG.cginc"
            
             uniform float4 _CColor;
+            uniform float4 _DColor;
+            uniform float _BaseBrightness;
+            uniform float _BreathIntensity;
+            uniform float _BreathSpeed;
             
             uniform float3 _CamOffset;           
             uniform float3 _CamOffsetMultiplier;
             uniform float _CamShakeIntensity;
+            uniform float _CamIqShakeIntensity;
             uniform float _CamMoveSpeed;
             
             uniform float _CirclesStart;
@@ -64,6 +74,7 @@ Shader "zLucPlayZ/Relentless" {
             
             uniform float _TimeMultiplier;
             #define time _Time.y * _TimeMultiplier
+            #define iqModi time * _CamIqShakeIntensity
             
             fixed2 rotate(fixed2 p, float a) {
                 return fixed2(p.x * cos(a) - p.y * sin(a), p.x * sin(a) + p.y * cos(a));
@@ -194,8 +205,8 @@ Shader "zLucPlayZ/Relentless" {
                 
                 // using an iq styled camera this time :)
                 // ray origin
-                fixed3 ro = 0.7 * fixed3(cos(0.2 * time), 0.0, sin(0.2 * time));
-                ro.y = cos(0.6 * time) * 0.3 + 0.65;
+                fixed3 ro = 0.7 * fixed3(cos(0.2 * iqModi), 0.0, sin(0.2 * iqModi));
+                ro.y = cos(0.6 * iqModi) * 0.3 + 0.65;
                 // camera look at
                 fixed3 ta = fixed3(0.0, 0.2, 0.0);
                 // camera shake intensity
@@ -281,8 +292,8 @@ Shader "zLucPlayZ/Relentless" {
                     }
                 }
                 
-                inten *= 0.4 + (sin(time) * 0.5 + 0.5) * 0.6;
-                fixed3 col = pow(fixed3(inten,inten,inten), (1 - _CColor.rgb) / _CColor.a);
+                inten *= _BaseBrightness + (sin(time * _BreathSpeed) * 0.5 + 0.5) * _BreathIntensity;
+                fixed3 col = pow(fixed3(inten,inten,inten) * (_DColor.rgb / _DColor.a), (1 - _CColor.rgb) / _CColor.a);
                 return fixed4(col, 1.0);
             }
         ENDCG
