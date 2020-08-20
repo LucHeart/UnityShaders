@@ -26,6 +26,8 @@ Shader "zLucPlayZ/Relentless" {
         _CirclesIteration("Circle Iteration", Range(0, 100)) = 4
         _CirclesStart("Circle Offset", Range(-100, 100)) = -16.0
         _CircleGaps("Circle Gaps", Range(0, 50)) = 8.0
+        _CircleOuterRotateSpeed("Circle Outer Rotate Speed Multiplier", Range(-10, 10)) = -1.333
+        _CircleInnerRotateSpeed("Circle Inner Rotate Speed Multiplier", Range(-10, 10)) = 3
         _StreamIteration("Stream Iterations", Range(0, 100)) = 20
         [Header(___ Background Settings ___)]
 	    [Space(10)]
@@ -62,6 +64,8 @@ Shader "zLucPlayZ/Relentless" {
             uniform float _CirclesIteration;
             uniform float _CircleGaps;
             uniform float _StreamIteration;
+            uniform float _CircleOuterRotateSpeed;
+            uniform float _CircleInnerRotateSpeed;
             
             uniform float _FloorIteration;
             uniform float _FloorGaps;
@@ -153,7 +157,7 @@ Shader "zLucPlayZ/Relentless" {
                 fixed2 pp;
                 l = length(p);
                 
-                pp = rotate(p, time * 3.0);
+                pp = rotate(p, time * _CircleInnerRotateSpeed);
                 c = max(dot(pp, normalize(fixed2(-0.2, 0.5))), -dot(pp, normalize(fixed2(0.2, 0.5))));
                 c = min(c, max(dot(pp, normalize(fixed2(0.5, -0.5))), -dot(pp, normalize(fixed2(0.2, -0.5)))));
                 c = min(c, max(dot(pp, normalize(fixed2(0.3, 0.5))), -dot(pp, normalize(fixed2(0.2, 0.5)))));
@@ -164,7 +168,8 @@ Shader "zLucPlayZ/Relentless" {
                 v = min(v, abs(l - 0.54) - 0.02);
                 v = min(v, abs(l - 0.64) - 0.05);
                 
-                pp = rotate(p, time * -1.333);
+                //outer stuff
+                pp = rotate(p, time * _CircleOuterRotateSpeed);
                 c = max(dot(pp, A2V(-5.0)), -dot(pp, A2V(5.0)));
                 c = min(c, max(dot(pp, A2V(25.0 - 5.0)), -dot(pp, A2V(25.0 + 5.0))));
                 c = min(c, max(dot(pp, A2V(50.0 - 5.0)), -dot(pp, A2V(50.0 + 5.0))));
