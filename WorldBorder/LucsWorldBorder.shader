@@ -52,10 +52,10 @@
             scrolledUV += fixed2(xScrollValue, yScrollValue);
             half4 c = tex2D(_MainTex, scrolledUV);
             c.rgba = c.rgba * _Color;
-            if(_RenderMode != 2) {
+            UNITY_BRANCH if(_RenderMode != 2) {
                 o.Albedo = c.rbg;
             }
-            if(_RenderMode != 1) {
+            UNITY_BRANCH if(_RenderMode != 1) {
                 o.Emission = c.rgb * _EmissionStrengh;
             }
 
